@@ -14,7 +14,6 @@ description: Markdown summary with different options
 ---
 
 ## Summary:
-
 You can pick as item to see how to apply in markdown.
 
 ### Comum Elements

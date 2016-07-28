@@ -1,0 +1,148 @@
+---
+title: "Reactive Cocoa Actions"
+layout: post
+hidden: false
+headerImage: false
+tag:
+- "Reactive Cocoa"
+- "RAC4"
+blog: true
+author: grillbiff
+---
+
+A Reactive Cocoa Action is basically a producer of SignalProducers which can be triggered time and time again. Actions also includes a couple of nice features which makes it great when you want to trigger some work based on user input, such as posting data to a webservice or cropping an image.
+
+### Posting data to a webservice
+
+
+{% highlight swift %}
+Action<Input, Output, Error: ErrorType>
+{% endhighlight %}
+
+As we can see from the class definition, Action will take some Input and produce some Output or possibly an Error. Action is always initialized with a closure that will return the SignalProducer which is created everytime the Action is executed.
+
+In our case the Input will be the data which should be posted to the webserver. The Output will be the response of the webservice and there is ofcourse always the possibility of something going wrong in which case an Error will be sent.
+
+Let's define the Action
+
+{% highlight swift %}
+var postAction: Action<String, NSData, NSError>
+{% endhighlight %}
+
+We will be sending a String to the webservice and will expect some NSData in return.
+
+As I mentioned previously all Actions are initialized with a closure which returns a SignalProducer. The SignalProducer is what will be doing the actual work of the Action.
+
+{% highlight swift %}
+self.postAction = Action<String, NSData, NSError>{ (input: String) in
+	return SignalProducer<NSData, Error> { sink, disposable in
+		...
+	}
+}
+{% endhighlight %}
+
+So the closure receives the Input part of the action as a parameter, in our case the String we want to send to the webservice. The Output and Error part of our Actions generic parameter list corresponds exactly to the definition of the the SignalProducer we return. That is, our returned SignalProducer should produce some NSData and possibly send an Error.
+
+{% highlight swift %}
+self.postAction = Action<String, NSData, NSError>{ (input: String) in
+	return SignalProducer<NSData, NSError> { sink, disposable in
+		let url = NSURL(string: "https://requestb.in/...")
+		let request = NSMutableURLRequest(URL: url!)
+		request.HTTPMethod = "POST"
+
+		let data = (input as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+
+		let task = NSURLSession.sharedSession().uploadTaskWithRequest(request, fromData: 			data) { (result: NSData?, response: NSURLResponse?, error: NSError?) in					
+			if let e = error {
+				sink.sendFailed(e)
+				return
+			}
+
+			if let d = data {
+				sink.sendNext(d)
+			}
+			sink.sendCompleted()
+		}
+
+		task.resume()
+	}
+}
+{% endhighlight %}
+
+The rest of the definition of the SignalProduces is business as usual. We create a request and post it to our webservice. If an error occured, we send it down the error pipe and finish. Otherwise we check for any returned data and then finally close the pipe.
+
+Now that we have defined our Action let's trigger it.
+
+{% highlight swift %}
+let signalProducer = self.postAction.apply("oh hai")
+signalProducer.startWithNext{ data in
+	// do something with the data
+}
+{% endhighlight %}
+
+As you can see, the Action only returns a SignalProducer to us, so we must start it our selves. In the example above we ignore the error to keep the code simple.
+
+#### Benefits of using an Action
+
+Ok, so now we have a simple version of an Action up and running but we are basically just using it as a SignalProducer factory of sorts. So what is the benefit of using an Action? We might just as well create a closure which returns a SignalProducer so why bother with the Action at all?
+
+An Action has three interesting properties, `events`, `values` and `errors`. These are Signals that will emit all events, all values and all errors ever sent by any SignalProducer created by the Action. That is, no matter how many times we execute the Action, all events, values and errors will be sent through the same Signals. This is great for handling errors, performing side effecting work such as logging or showing a spinner when the Action is executing. In fact, knowing when the Action is executing is such a common thing that it has its own Signal `executing`
+
+
+{% highlight swift %}
+self.postAction.values.observeNext { data in
+	print("Received data: \(data)")
+}
+
+self.postAction.errors.observeNext { error in
+	print("Error: \(error.localizedDescription)")
+}
+
+self.postAction.executing.signal.observeNext { executing in
+	if executing {
+		print("Sending request")
+	} else {
+		print("Received response")
+	}
+}
+{% endhighlight %}
+
+An Action can also be initialized with a Property which controls wheter the Action should be enabled or not. This makes it easy for us to add some validation for the input data.
+
+{% highlight swift %}
+let validProperty = MutableProperty<Bool>(false)
+validProperty <~ self.inputSignal.map{ $0.characters.count > 3 }
+self.postAction = Action<String, NSData, NSError>(enabledIf: validProperty) { (input: String) in
+	...
+}
+{% endhighlight %}
+
+If we try and execute a returned SignalProducer while it is disabled it will send a `ActionError.NotEnabled`. One thing to look for is that the ActionError is sent on the SignalProducer, not the Action.
+
+{% highlight swift %}
+self.postAction = Action<String, NSData, NSError>(enabledIf: ConstantProperty(false)) { (input: String) in
+	...
+}
+
+let sp = self.postAction.apply("oh hai")
+sp.startWithFailed { (err: ActionError<NSError>) in
+	print("err: \(err)")
+}
+
+{% endhighlight %}
+
+
+The executing of an Action is completely serial, meaning that only one of the SignalProducers created by the Action can be running at any one time. In our example this means that starting a second request while the first one is still pending will result in a `ActionError.NotEnabled`.
+
+#### CocoaAction
+
+Lastly it would be nice to connect the input to a UITextField so that when the text field changes our Action is triggered. Enter `CocoaAction`. `CocoaAction` takes an `Action` as the first argument and a closure as the second argument. The closure receives the UIControl that triggered the `CocoaAction` as an argument. The value returned by the closure will be used as the Input for the `Action`, in our case a String.
+
+{% highlight swift %}
+self.cocoaInputAction = CocoaAction(self.postAction) { (sender: AnyObject?) -> String in
+	let textField = sender as! UITextField
+	return textField.text!
+}
+
+self.inputTextField.addTarget(self, action: CocoaAction.selector, forControlEvents: UIControlEvents.AllEditingEvents)
+{% endhighlight %}

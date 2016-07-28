@@ -154,6 +154,3 @@ DEPENDENCIES
   pygments.rb
   rake
   rouge
-
-BUNDLED WITH
-   1.11.2
