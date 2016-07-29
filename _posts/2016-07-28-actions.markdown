@@ -146,3 +146,5 @@ self.cocoaInputAction = CocoaAction(self.postAction) { (sender: AnyObject?) -> S
 
 self.inputTextField.addTarget(self, action: CocoaAction.selector, forControlEvents: UIControlEvents.AllEditingEvents)
 {% endhighlight %}
+
+That's it for this time. Hope you enjoyed the article and if you have any thoughts or feedback I would be happy hear it.
