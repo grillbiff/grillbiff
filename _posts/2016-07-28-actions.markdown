@@ -6,9 +6,13 @@ headerImage: false
 tag:
 - "Reactive Cocoa"
 - "RAC4"
+- "Swift"
+- "Action"
 blog: true
 author: grillbiff
 ---
+
+## Actions
 
 A Reactive Cocoa Action is basically a producer of SignalProducers which can be triggered time and time again. Actions also includes a couple of nice features which makes it great when you want to trigger some work based on user input, such as posting data to a webservice or cropping an image.
 
