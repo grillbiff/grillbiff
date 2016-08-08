@@ -39,9 +39,9 @@ As I mentioned previously all Actions are initialized with a closure which retur
 
 {% highlight swift %}
 self.postAction = Action<String, NSData, NSError>{ (input: String) in
-	return SignalProducer<NSData, Error> { sink, disposable in
-		...
-	}
+  return SignalProducer<NSData, Error> { sink, disposable in
+    ...
+  }
 }
 {% endhighlight %}
 
@@ -49,27 +49,27 @@ So the closure receives the Input part of the action as a parameter, in our case
 
 {% highlight swift %}
 self.postAction = Action<String, NSData, NSError>{ (input: String) in
-	return SignalProducer<NSData, NSError> { sink, disposable in
-		let url = NSURL(string: "https://requestb.in/...")
-		let request = NSMutableURLRequest(URL: url!)
-		request.HTTPMethod = "POST"
+  return SignalProducer<NSData, NSError> { sink, disposable in
+    let url = NSURL(string: "https://requestb.in/...")
+    let request = NSMutableURLRequest(URL: url!)
+    request.HTTPMethod = "POST"
 
-		let data = (input as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+    let data = (input as NSString).dataUsingEncoding(NSUTF8StringEncoding)
 
-		let task = NSURLSession.sharedSession().uploadTaskWithRequest(request, fromData: 			data) { (result: NSData?, response: NSURLResponse?, error: NSError?) in					
-			if let e = error {
-				sink.sendFailed(e)
-				return
-			}
+    let task = NSURLSession.sharedSession().uploadTaskWithRequest(request, fromData: 			data) { (result: NSData?, response: NSURLResponse?, error: NSError?) in					
+      if let e = error {
+        sink.sendFailed(e)
+        return
+      }
 
-			if let d = data {
-				sink.sendNext(d)
-			}
-			sink.sendCompleted()
-		}
+      if let d = data {
+        sink.sendNext(d)
+      }
+      sink.sendCompleted()
+    }
 
-		task.resume()
-	}
+    task.resume()
+  }
 }
 {% endhighlight %}
 
@@ -80,7 +80,7 @@ Now that we have defined our Action let's trigger it.
 {% highlight swift %}
 let signalProducer = self.postAction.apply("oh hai")
 signalProducer.startWithNext{ data in
-	// do something with the data
+  // do something with the data
 }
 {% endhighlight %}
 
@@ -95,19 +95,19 @@ An Action has three interesting properties, `events`, `values` and `errors`. The
 
 {% highlight swift %}
 self.postAction.values.observeNext { data in
-	print("Received data: \(data)")
+  print("Received data: \(data)")
 }
 
 self.postAction.errors.observeNext { error in
-	print("Error: \(error.localizedDescription)")
+  print("Error: \(error.localizedDescription)")
 }
 
 self.postAction.executing.signal.observeNext { executing in
-	if executing {
-		print("Sending request")
-	} else {
-		print("Received response")
-	}
+  if executing {
+    print("Sending request")
+  } else {
+    print("Received response")
+  }
 }
 {% endhighlight %}
 
@@ -117,7 +117,7 @@ An Action can also be initialized with a Property which controls wheter the Acti
 let validProperty = MutableProperty<Bool>(false)
 validProperty <~ self.inputSignal.map{ $0.characters.count > 3 }
 self.postAction = Action<String, NSData, NSError>(enabledIf: validProperty) { (input: String) in
-	...
+  ...
 }
 {% endhighlight %}
 
@@ -125,12 +125,12 @@ If we try and execute a returned SignalProducer while it is disabled it will sen
 
 {% highlight swift %}
 self.postAction = Action<String, NSData, NSError>(enabledIf: ConstantProperty(false)) { (input: String) in
-	...
+  ...
 }
 
 let sp = self.postAction.apply("oh hai")
 sp.startWithFailed { (err: ActionError<NSError>) in
-	print("err: \(err)")
+  print("err: \(err)")
 }
 
 {% endhighlight %}
@@ -144,8 +144,8 @@ Lastly it would be nice to connect the input to a UITextField so that when the t
 
 {% highlight swift %}
 self.cocoaInputAction = CocoaAction(self.postAction) { (sender: AnyObject?) -> String in
-	let textField = sender as! UITextField
-	return textField.text!
+  let textField = sender as! UITextField
+  return textField.text!
 }
 
 self.inputTextField.addTarget(self, action: CocoaAction.selector, forControlEvents: UIControlEvents.AllEditingEvents)
