@@ -14,8 +14,6 @@ hidden: false
 author: grillbiff
 ---
 
-## Reactive Cocoa and NSNotificationCenter
-
 Wouldn´t it be nice to receive notifications from NSNotificationCenter on a signal so that it plays nice with the rest of your Reactive Cocoa? Of course it would!
 
 If you are not already familiar with NSNotificationCenter it is a hub for broadcasting information within an app. You can listen in on messages beeing sent (mainly by the system) and you can send your own custom messages. To start receiving notfications you add an observer (essentially subscribe) to the NSNotificationCenter for a specific notification name (i.e `UIKeyboardWillShowNotification`). When you are done listening for notifications you have to unsubscribe your observer from the NSNotificationCenter.
