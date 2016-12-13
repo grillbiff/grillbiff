@@ -1,5 +1,5 @@
 ---
-title: "reactive_swift_part_1"
+title: "Reactive Swift Tutorial Part 1"
 layout: post
 date: 2016-11-15 21:58
 image: '/assets/images/'
