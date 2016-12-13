@@ -11,7 +11,7 @@ tag:
 - "SignalProducer"
 blog: true
 jemoji:
-author:
+author: grillbiff
 ---
 
 # Reactive Swift Tutorial Part 1
