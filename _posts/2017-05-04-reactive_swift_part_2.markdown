@@ -16,7 +16,7 @@ author: grillbiff
 
 # Reactive Swift Tutorial Part 2
 
-In [part 1](2016-11-15-reactive_swift_part_1.markdown) you got a simple hello world up and running. In this part, we will take a look at the core concepts of `Signals` and `SignalProducers`.
+In [part 1](/2016-11-15-reactive_swift_part_1.markdown) you got a simple hello world up and running. In this part, we will take a look at the core concepts of `Signals` and `SignalProducers`.
 
 ## A brief history of Signals and SignalProducers
 
