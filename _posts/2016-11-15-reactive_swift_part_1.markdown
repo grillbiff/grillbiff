@@ -67,4 +67,4 @@ We added a map operator which, you´ve guessed it, maps one value to another. In
 That is it for this time. As always, feedback is much appriciated.
 
 In the next tutorial we take a closer look at `Signals` and `SignalProducers`
-[part 2](/2017-05-04-reactive_swift_part_2.markdown)
+[part 2](/reactive_swift_part_2/)
