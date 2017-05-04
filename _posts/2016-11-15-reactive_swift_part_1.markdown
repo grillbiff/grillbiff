@@ -65,3 +65,6 @@ sp.startWithValues { (input: String) in
 We added a map operator which, you´ve guessed it, maps one value to another. In our case a String is converted to its uppercase equivalent. There are of course [more operators available](https://github.com/ReactiveCocoa/ReactiveSwift/blob/master/Documentation/BasicOperators.md#mapping) so feel free to experiment with them.
 
 That is it for this time. As always, feedback is much appriciated.
+
+In the next tutorial we take a closer look at `Signals` and `SignalProducers`
+[part 2](2017-05-04-reactive_swift_part_2.markdown)
