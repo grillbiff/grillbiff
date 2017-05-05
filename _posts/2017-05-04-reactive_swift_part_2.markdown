@@ -9,6 +9,7 @@ tag:
 - "RAC4"
 - "Swift"
 - "SignalProducer"
+- "tutorial"
 blog: true
 jemoji:
 author: grillbiff
